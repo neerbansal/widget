@@ -19,15 +19,22 @@
             padding: 0;
             background-color: #222; /* Dark background for visibility */
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px; /* Space between the widget and the bottom image */
         }
 
         .widget-container {
             position: relative;
-            /* Based on the largest image dimension */
-            width: 1080px;
+            width: 997px;
             height: 917px;
             display: flex;
             justify-content: center;
@@ -39,21 +46,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            pointer-events: none; /* Let clicks pass through if needed */
-        }
-
-        .bg-layer {
-            z-index: 1;
+            pointer-events: none;
         }
 
         .clock-container {
             position: absolute;
-            z-index: 2;
+            z-index: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* Added basic offsets if needed, we're assuming dead center is fine to start */
         }
 
         .time {
@@ -69,6 +71,7 @@
         .timezone {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 80px;
+            font-weight: bold; /* Bold Bebas Neue */
             color: white;
             -webkit-text-stroke: 2px black;
             line-height: 1;
@@ -78,36 +81,38 @@
         }
 
         .fg-layer {
-            z-index: 3;
+            z-index: 2;
+        }
+
+        .bottom-image {
+            /* Pushed completely below the main container */
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="widget-container">
-        <img src="1cmbeneathwidget.png" class="layer bg-layer" alt="Background Layer">
-
-                <div class="clock-container">
-            <div class="time" id="timeDisplay">00:00</div>
-            <div class="timezone" id="timezoneDisplay">UTC</div>
+    <div class="main-wrapper">
+        <div class="widget-container">
+            <div class="clock-container">
+                <div class="time" id="timeDisplay">00:00</div>
+                <div class="timezone" id="timezoneDisplay">UTC</div>
+            </div>
+            <img src="widget.png" class="layer fg-layer" alt="Foreground Widget Layer">
         </div>
 
-        <img src="widget.png" class="layer fg-layer" alt="Foreground Widget Layer">
+        <img src="1cmbeneathwidget.png" class="bottom-image" alt="Background Layer Moved Below">
     </div>
 
     <script>
         function updateClock() {
             const now = new Date();
 
-            // Format time: HH:MM (24-hour)
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const timeString = `${hours}:${minutes}`;
 
-            // Get local timezone short string
-            // We use standard options for the browser's language, getting the short generic or specific name
             let tzString = "";
             try {
-                // Try to get short name like EST, PST, etc.
                 const tzFormatter = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' });
                 const parts = tzFormatter.formatToParts(now);
                 const tzPart = parts.find(part => part.type === 'timeZoneName');
@@ -118,9 +123,7 @@
                 console.error("Error formatting timezone:", e);
             }
 
-            // Fallback if we couldn't parse it
             if (!tzString) {
-                // Simple fallback to GMT offset if the specific string fails
                 const offset = -now.getTimezoneOffset();
                 const offsetHours = Math.floor(Math.abs(offset) / 60);
                 const sign = offset >= 0 ? '+' : '-';
@@ -131,10 +134,7 @@
             document.getElementById('timezoneDisplay').innerText = tzString;
         }
 
-        // Initialize clock
         updateClock();
-
-        // Update every second (to catch minute rollovers accurately)
         setInterval(updateClock, 1000);
     </script>
 </body>
