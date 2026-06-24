@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invincible OS Clock Widget</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+        @font-face {
+            font-family: 'Molot';
+            src: url('Molot.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222; /* Dark background for visibility */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .widget-container {
+            position: relative;
+            /* Based on the largest image dimension */
+            width: 1080px;
+            height: 917px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none; /* Let clicks pass through if needed */
+        }
+
+        .bg-layer {
+            z-index: 1;
+        }
+
+        .clock-container {
+            position: absolute;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Added basic offsets if needed, we're assuming dead center is fine to start */
+        }
+
+        .time {
+            font-family: 'Molot', sans-serif;
+            font-size: 180px;
+            color: black;
+            -webkit-text-stroke: 4px white;
+            line-height: 1;
+            margin: 0;
+            padding: 0;
+        }
+
+        .timezone {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 80px;
+            color: white;
+            -webkit-text-stroke: 2px black;
+            line-height: 1;
+            margin: 0;
+            padding: 0;
+            letter-spacing: 2px;
+        }
+
+        .fg-layer {
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <img src="1cmbeneathwidget.png" class="layer bg-layer" alt="Background Layer">
+
+                <div class="clock-container">
+            <div class="time" id="timeDisplay">00:00</div>
+            <div class="timezone" id="timezoneDisplay">UTC</div>
+        </div>
+
+        <img src="widget.png" class="layer fg-layer" alt="Foreground Widget Layer">
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+
+            // Format time: HH:MM (24-hour)
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+
+            // Get local timezone short string
+            // We use standard options for the browser's language, getting the short generic or specific name
+            let tzString = "";
+            try {
+                // Try to get short name like EST, PST, etc.
+                const tzFormatter = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' });
+                const parts = tzFormatter.formatToParts(now);
+                const tzPart = parts.find(part => part.type === 'timeZoneName');
+                if (tzPart) {
+                    tzString = tzPart.value;
+                }
+            } catch (e) {
+                console.error("Error formatting timezone:", e);
+            }
+
+            // Fallback if we couldn't parse it
+            if (!tzString) {
+                // Simple fallback to GMT offset if the specific string fails
+                const offset = -now.getTimezoneOffset();
+                const offsetHours = Math.floor(Math.abs(offset) / 60);
+                const sign = offset >= 0 ? '+' : '-';
+                tzString = `GMT${sign}${offsetHours}`;
+            }
+
+            document.getElementById('timeDisplay').innerText = timeString;
+            document.getElementById('timezoneDisplay').innerText = tzString;
+        }
+
+        // Initialize clock
+        updateClock();
+
+        // Update every second (to catch minute rollovers accurately)
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
