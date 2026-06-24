@@ -22,78 +22,98 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Scaled down container to fit mobile screens comfortably */
+        .widget-master-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 480px; 
+            padding: 10px;
         }
 
         .widget-container {
             position: relative;
-            width: 1000x;
-            height: 450px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%;
+            aspect-ratio: 1080 / 917; /* Keeps original proportions perfectly */
         }
 
         .layer {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none; /* Let clicks pass through if needed */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
-        .bg-layer {
+        /* Main logo shell sits in the background layout layer */
+        .bg-logo-layer {
             z-index: 1;
         }
 
+        /* Precise targeting of the middle gap text zone */
         .clock-container {
             position: absolute;
-            z-index: 10;
-            left: 54%;
-            right: 40%;
-          transform;translate(-50%,-50%) ;
+            z-index: 10; /* Forces text to float completely on top of everything */
+            left: 54%;   /* Centered in the white gap right next to 'BY' */
+            top: 40%;    
+            transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-           
+            width: auto;
         }
 
         .time {
-    font-family: 'Molot', sans-serif;
-    font-size: 80px; /* Much cleaner sizing for the space */
-    color: black;
-    -webkit-text-stroke: 3px white;
-    line-height: 0.9;
-    margin: 0;
-    padding: 0;
-}
-.timezone {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px; /* Scales perfectly under the Molot numbers */
-    color: white;
-    -webkit-text-stroke: 1.5px black;
-    line-height: 1;
-    margin: 0;
-    padding: 0;
-    letter-spacing: 1px;
-}
+            font-family: 'Molot', sans-serif;
+            font-size: 85px; /* Shrunk down so it doesn't leak into adjacent text fields */
+            color: black;
+            -webkit-text-stroke: 3px white;
+            line-height: 0.9;
+            margin: 0;
+            padding: 0;
+            letter-spacing: -2px;
+        }
 
+        .timezone {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 38px;
+            color: white;
+            -webkit-text-stroke: 1.5px black;
+            line-height: 1;
+            margin: 0;
+            padding: 0;
+            letter-spacing: 1px;
+            margin-top: -2px;
+        }
 
-        .fg-layer {
-            z-index: 3;
+        /* Moves the accent graphic completely outside the overlapping frame stack */
+        .accent-strip {
+            width: 85%;
+            margin-top: -15px; /* Pulls it up tight right under 'universe' text line */
+            z-index: 5;
+            object-fit: contain;
         }
     </style>
 </head>
 <body>
-    <div class="widget-container">
-        <img src="1cmbeneathwidget.png" class="layer bg-layer" alt="Background Layer">
 
-                <div class="clock-container">
-            <div class="time" id="timeDisplay">00:00</div>
-            <div class="timezone" id="timezoneDisplay">UTC</div>
+    <div class="widget-master-wrapper">
+        <div class="widget-container">
+            <img src="widget.png" class="layer bg-logo-layer" alt="Widget Shell">
+            
+            <div class="clock-container">
+                <div class="time" id="timeDisplay">00:00</div>
+                <div class="timezone" id="timezoneDisplay">INDIA</div>
+            </div>
         </div>
 
-        <img src="widget.png" class="layer fg-layer" alt="Foreground Widget Layer">
+        <img src="1cmbeneathwidget.png" class="accent-strip" alt="Accent Layer">
     </div>
 
     <script>
@@ -103,40 +123,26 @@
             // Format time: HH:MM (24-hour)
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            const timeString = `${hours}:${minutes}`;
+            document.getElementById('timeDisplay').innerText = `${hours}:${minutes}`;
 
-            // Get local timezone short string
-            // We use standard options for the browser's language, getting the short generic or specific name
-            let tzString = "";
+            // Automatic timezone rendering logic
+            let tzString = "INDIA"; // Set your default display string fallback
             try {
-                // Try to get short name like EST, PST, etc.
                 const tzFormatter = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' });
                 const parts = tzFormatter.formatToParts(now);
                 const tzPart = parts.find(part => part.type === 'timeZoneName');
-                if (tzPart) {
+                if (tzPart && tzPart.value !== 'GMT+5:30') {
                     tzString = tzPart.value;
                 }
             } catch (e) {
                 console.error("Error formatting timezone:", e);
             }
 
-            // Fallback if we couldn't parse it
-            if (!tzString) {
-                // Simple fallback to GMT offset if the specific string fails
-                const offset = -now.getTimezoneOffset();
-                const offsetHours = Math.floor(Math.abs(offset) / 60);
-                const sign = offset >= 0 ? '+' : '-';
-                tzString = `GMT${sign}${offsetHours}`;
-            }
-
-            document.getElementById('timeDisplay').innerText = timeString;
             document.getElementById('timezoneDisplay').innerText = tzString;
         }
 
-        // Initialize clock
+        // Initialize clock engine
         updateClock();
-
-        // Update every second (to catch minute rollovers accurately)
         setInterval(updateClock, 1000);
     </script>
 </body>
