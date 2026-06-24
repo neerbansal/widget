@@ -26,9 +26,8 @@
 
         .widget-container {
             position: relative;
-            /* Based on the largest image dimension */
-            width: 1080px;
-            height: 917px;
+            width: 1000x;
+            height: 450px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -48,34 +47,37 @@
 
         .clock-container {
             position: absolute;
-            z-index: 2;
+            z-index: 10;
+            left: 54%;
+            right: 40%;
+          transform;translate(-50%,-50%) ;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* Added basic offsets if needed, we're assuming dead center is fine to start */
+           
         }
 
         .time {
-            font-family: 'Molot', sans-serif;
-            font-size: 180px;
-            color: black;
-            -webkit-text-stroke: 4px white;
-            line-height: 1;
-            margin: 0;
-            padding: 0;
-        }
+    font-family: 'Molot', sans-serif;
+    font-size: 80px; /* Much cleaner sizing for the space */
+    color: black;
+    -webkit-text-stroke: 3px white;
+    line-height: 0.9;
+    margin: 0;
+    padding: 0;
+}
+.timezone {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; /* Scales perfectly under the Molot numbers */
+    color: white;
+    -webkit-text-stroke: 1.5px black;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    letter-spacing: 1px;
+}
 
-        .timezone {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 80px;
-            color: white;
-            -webkit-text-stroke: 2px black;
-            line-height: 1;
-            margin: 0;
-            padding: 0;
-            letter-spacing: 2px;
-        }
 
         .fg-layer {
             z-index: 3;
